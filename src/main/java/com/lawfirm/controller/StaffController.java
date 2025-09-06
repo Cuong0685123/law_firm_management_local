@@ -4,6 +4,7 @@ import com.lawfirm.dto.LoginRequest;
 import com.lawfirm.dto.RegisterRequest;
 import com.lawfirm.model.Staff;
 import com.lawfirm.service.StaffService;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +33,20 @@ public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
 public ResponseEntity<?> login(@RequestBody LoginRequest request) {
     boolean success = staffService.login(request.getUsername(), request.getPassword());
     if (success) {
-        return ResponseEntity.ok("Đăng nhập thành công!");
+        return ResponseEntity.ok(
+            Map.of(
+                "status", "success",
+                "username", request.getUsername(),
+                "message", "Đăng nhập thành công!"
+            )
+        );
     }
-    return ResponseEntity.status(401).body("Sai tên đăng nhập hoặc mật khẩu!");
+    return ResponseEntity.status(401).body(
+        Map.of(
+            "status", "fail",
+            "message", "Sai tên đăng nhập hoặc mật khẩu!"
+        )
+    );
 }
+
 }
