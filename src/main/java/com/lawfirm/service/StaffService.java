@@ -1,5 +1,6 @@
 package com.lawfirm.service;
 
+import com.lawfirm.dto.LoginRequest;
 import com.lawfirm.model.Staff;
 import com.lawfirm.repository.StaffRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -7,6 +8,10 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class StaffService {
+
+    public static boolean validate(LoginRequest loginRequest) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
 
     private final StaffRepository staffRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
