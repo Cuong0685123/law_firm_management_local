@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface CaseRepository extends JpaRepository<CasesEntity, Long> {
-   
+    boolean existsByCode(String code);
 }

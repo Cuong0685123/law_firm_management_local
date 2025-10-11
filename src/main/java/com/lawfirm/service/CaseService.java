@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,31 +38,49 @@ public class CaseService {
                 .build();
     }
 
-    // Create
-    public CaseDto create(CaseDto dto) {
-        Client client = clientRepository.findById(dto.getClientId())
-                .orElseThrow(() -> new RuntimeException("Client not found"));
+ public CaseDto create(CaseDto dto) {
+    Client client = clientRepository.findById(dto.getClientId())
+            .orElseThrow(() -> new RuntimeException("Client not found"));
 
-        CasesEntity entity = CasesEntity.builder()
-                .code(dto.getCode())
-                .category(dto.getCategory())
-                .requestContent(dto.getRequestContent())
-                .legalRelation(dto.getLegalRelation())
-                .objective(dto.getObjective())
-                .applicableLaw(dto.getApplicableLaw())
-                .resolvingAgency(dto.getResolvingAgency())
-                .product(dto.getProduct())
-                .result(dto.getResult())
-                .fee(dto.getFee())
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
-                .client(client)
-                .build();
+    String code = dto.getCode();
 
-        return mapToDto(caseRepository.save(entity));
+    // ✅ Nếu người dùng không nhập code hoặc bị trùng → tự động sinh mã mới
+    if (code == null || code.isBlank() || caseRepository.existsByCode(code)) {
+        code = generateUniqueCaseCode();
     }
 
-    // Read all
+    CasesEntity entity = CasesEntity.builder()
+            .code(code)
+            .category(dto.getCategory())
+            .requestContent(dto.getRequestContent())
+            .legalRelation(dto.getLegalRelation())
+            .objective(dto.getObjective())
+            .applicableLaw(dto.getApplicableLaw())
+            .resolvingAgency(dto.getResolvingAgency())
+            .product(dto.getProduct())
+            .result(dto.getResult())
+            .fee(dto.getFee())
+            .startDate(dto.getStartDate())
+            .endDate(dto.getEndDate())
+            .client(client)
+            .build();
+
+    return mapToDto(caseRepository.save(entity));
+}
+
+
+
+
+    // ✅ Generate unique code (loop until not exists)
+    private String generateUniqueCaseCode() {
+        String code;
+        do {
+            code = "CASE-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
+        } while (caseRepository.existsByCode(code));
+        return code;
+    }
+
+    // ✅ Read all
     public List<CaseDto> getAll() {
         return caseRepository.findAll()
                 .stream()
@@ -69,19 +88,18 @@ public class CaseService {
                 .collect(Collectors.toList());
     }
 
-    // Read by ID
+    // ✅ Read by ID
     public CaseDto getById(Long id) {
         return caseRepository.findById(id)
                 .map(this::mapToDto)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
     }
 
-    // Update
+    // ✅ Update
     public CaseDto update(Long id, CaseDto dto) {
         CasesEntity entity = caseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Case not found"));
 
-        entity.setCode(dto.getCode());
         entity.setCategory(dto.getCategory());
         entity.setRequestContent(dto.getRequestContent());
         entity.setLegalRelation(dto.getLegalRelation());
@@ -100,11 +118,22 @@ public class CaseService {
             entity.setClient(client);
         }
 
+        // ✅ Nếu đổi code, phải đảm bảo không trùng
+        if (dto.getCode() != null && !dto.getCode().equals(entity.getCode())) {
+            if (caseRepository.existsByCode(dto.getCode())) {
+                throw new RuntimeException("Case code already exists: " + dto.getCode());
+            }
+            entity.setCode(dto.getCode());
+        }
+
         return mapToDto(caseRepository.save(entity));
     }
 
-    // Delete
+    // ✅ Delete
     public void delete(Long id) {
+        if (!caseRepository.existsById(id)) {
+            throw new RuntimeException("Case not found");
+        }
         caseRepository.deleteById(id);
     }
 }

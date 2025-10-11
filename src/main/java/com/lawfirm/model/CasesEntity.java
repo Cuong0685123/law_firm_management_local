@@ -2,7 +2,6 @@ package com.lawfirm.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
@@ -20,11 +19,12 @@ public class CasesEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Code vụ án, tự sinh nếu chưa có
     @Column(unique = true)
     private String code;
 
     private String category;
-    
+
     @Lob
     private String requestContent;
     @Lob
@@ -46,7 +46,6 @@ public class CasesEntity {
     private LocalDate startDate = LocalDate.now();
     private LocalDate endDate;
 
-    // Quan hệ
     @ManyToOne
     @JoinColumn(name = "client_id", nullable = false)
     private Client client;
