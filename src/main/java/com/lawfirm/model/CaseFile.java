@@ -2,34 +2,30 @@ package com.lawfirm.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
-@Table(name = "contract")
+@Table(name = "case_file")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Contract {
+public class CaseFile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String code;
+    private String fileName;
+    private String fileType;
+    private String filePath;
 
-    @Lob
-    private String content;
+    private LocalDateTime uploadDate = LocalDateTime.now();
 
-    private LocalDate signDate;
-    private BigDecimal fee;
-
-    // Liên kết 1-1 với CasesEntity
-    @OneToOne
-    @JoinColumn(name = "case_id", referencedColumnName = "id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "case_id", nullable = false)
     @JsonBackReference
     private CasesEntity caseEntity;
 }

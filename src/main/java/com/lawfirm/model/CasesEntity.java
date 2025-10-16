@@ -5,6 +5,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "cases")
@@ -19,7 +21,7 @@ public class CasesEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Code vụ án, tự sinh nếu chưa có
+    // Mã vụ án (code), tự sinh nếu chưa có
     @Column(unique = true)
     private String code;
 
@@ -58,9 +60,18 @@ public class CasesEntity {
     )
     private Set<Staff> assignedStaff;
 
+    // --- Quan hệ 1-1 với Contract ---
     @OneToOne(mappedBy = "caseEntity", cascade = CascadeType.ALL)
+    @JsonManagedReference
     private Contract contract;
 
+    // --- Quan hệ 1-N với CaseFile ---
+    @OneToMany(mappedBy = "caseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private Set<CaseFile> caseFiles;
+
+    // --- Quan hệ N-N với Report ---
     @ManyToMany(mappedBy = "cases")
+    @JsonBackReference
     private Set<Report> reports;
 }
